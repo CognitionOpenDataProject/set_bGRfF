@@ -8,7 +8,6 @@ output:
 
 #### Article ID: bGRfF
 #### Pilot: Catherine Thomas  
-#### Co-pilot: Tom Hardwicke  
 #### Start date: 03/27/2017
 #### End date: 03/27/2017  
 
@@ -40,13 +39,13 @@ library(knitr) # for kable table formating
 library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
 library(CODreports) # custom report functions
-library(forcats)
+library(forcats) # handling categorical data
 ```
 
 ## Step 2: Load data
 
 ```{r}
-d <- read_csv("../data/data_manualClean.csv", col_names = TRUE, col_types = NULL, na = c("", "NA")) 
+d <- read_csv("data/data_manualClean.csv", col_names = TRUE, col_types = NULL, na = c("", "NA")) 
 ```
 The data was manually edited in Excel such that the column titles reflected the measurement (e.g. RHI Index) and condition (Synchronous vs. Asynchronous).
 
