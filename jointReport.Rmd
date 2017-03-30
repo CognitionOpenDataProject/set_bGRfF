@@ -121,7 +121,7 @@ compareValues(reportedValue = 2.38, obtainedValue = round(z,2))
 
 ## Step 5: Conclusion
 
-This reproducibility check was a success. All target outcomes were successfull reproduced.
+This reproducibility check was a success. All target outcomes were successfully reproduced.
 
 ```{r}
 codReport(Report_Type = 'joint',
