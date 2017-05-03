@@ -129,7 +129,8 @@ codReport(Report_Type = 'joint',
           Insufficient_Information_Errors = 0,
           Decision_Errors = 0, 
           Major_Numerical_Errors = 0, 
-          Minor_Numerical_Errors = 2)
+          Minor_Numerical_Errors = 2,
+          Author_Assistance = F)
 ```
 
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
