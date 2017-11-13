@@ -9,8 +9,10 @@ output:
 #### Article ID: bGRfF
 #### Pilot: Catherine Thomas  
 #### Co-pilot: Tom Hardwicke
-#### Start date: 03/27/2017
-#### End date: 03/28/2017
+#### Start date: Mar 27 2017
+#### End date: Mar 28 2017
+#### Final verification: Tom Hardwicke
+#### Date: Nov 8 2017
 
 -------
 
@@ -22,7 +24,7 @@ In Experiment 1, the authors assessed whether the RHI method succcessfully induc
 ------
 
 #### Target outcomes: 
-Using the Wilcoxon test, we assess whether the mean RHI index score in the synchronous condition is significantly greater than the central point, i.e. a score of 0, and whether the mean RHI index score is greater in the synchronous condition compared to the asynchronous condition. We aim to replicate the following results:
+Using the Wilcoxon test, we assess whether the mean RHI index score in the synchronous condition is significantly greater than the central point, i.e. a score of 0, and whether the mean RHI index score is greater in the synchronous condition compared to the asynchronous condition. We aim to reproduce the following results:
 
 > Data violated the assumptions for normality (Shapiro-Wilks, p < 0.05). Wilcoxon rank tests are reported. As we implemented a new procedure to induce the RHI, using a LED on the rubber hand and a mechanical tapper on the participants’ hand, we firstly tested whether such induction procedure was effective in producing a reliable illusion. To this aim we tested whether mean rating to illusion statements were significantly different from the "neither agree/disagree" response (i.e. central point in the Likert scale). Illusion ratings after synchronous stimulation (Median(SD): 1.5(1.18)) was significantly higher than the central point (Wilcoxon test: p < 0.001). Hence, we can safely infer that we induced the RHI. Importantly, when comparing the synchronous and the asynchronous conditions (i.e. 25% rate of perceive synchrony) we found that participants experienced a significantly stronger RHI following the synchronous (median(SD) = 1.5(1.18)) compared to the asynchronous condition (median(SD) = 0.8(1.35); z(35) = 2.38; p = 0.017.
 
@@ -30,6 +32,9 @@ Using the Wilcoxon test, we assess whether the mean RHI index score in the synch
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+
+# prepare an empty report object, we will update this each time we run compareValues2()
+reportObject <- data.frame("Article_ID" = NA, "valuesChecked" = 0, "eyeballs" = 0, "Total_df" = 0, "Total_p" = 0, "Total_mean" = 0, "Total_sd" = 0, "Total_se" = 0, "Total_ci" = 0, "Total_bf" = 0, "Total_t" = 0, "Total_F" = 0, "Total_es" = 0, "Total_median" = 0, "Total_irr" = 0, "Total_r" = 0, "Total_z" = 0, "Total_coeff" = 0, "Total_n" = 0, "Total_x2" = 0, "Total_other" = 0, "Insufficient_Information_Errors" = 0, "Decision_Errors" = 0, "Major_Numerical_Errors" = 0, "Minor_Numerical_Errors" = 0, "Major_df" = 0, "Major_p" = 0, "Major_mean" = 0, "Major_sd" = 0, "Major_se" = 0, "Major_ci" = 0, "Major_bf" = 0, "Major_t" = 0, "Major_F" = 0, "Major_es" = 0, "Major_median" = 0, "Major_irr" = 0, "Major_r" = 0, "Major_z" = 0, "Major_coeff" = 0, "Major_n" = 0, "Major_x2" = 0, "Major_other" = 0, "affectsConclusion" = NA, "error_typo" = 0, "error_specification" = 0, "error_analysis" = 0, "error_data" = 0, "error_unidentified" = 0, "Author_Assistance" = NA, "resolved_typo" = 0, "resolved_specification" = 0, "resolved_analysis" = 0, "resolved_data" = 0, "correctionSuggested" = NA, "correctionPublished" = NA)
 ```
 
 ## Step 1: Load packages
@@ -52,6 +57,8 @@ d <- read_csv("data/data_manualClean.csv", col_names = TRUE, col_types = NULL, n
 The data was manually edited in Excel such that the column titles reflected the measurement (e.g. RHI Index) and condition (Synchronous vs. Asynchronous).
 
 ## Step 3: Tidy data
+
+Data needs restructuring slightly:
 
 ```{r}
 tidy.d <- d %>%
@@ -77,16 +84,16 @@ synch <- d_summary %>% filter(Condition == "Synchronous")
 asynch <- d_summary %>% filter(Condition == "Asynchronous")
 
 # synchronous
-compareValues(reportedValue = 1.5, obtainedValue = synch$Median)
-compareValues(reportedValue = 1.18, obtainedValue = round(synch$sd, 2))
+reportObject <- compareValues2(reportedValue = "1.5", obtainedValue = synch$Median, valueType = 'median')
+reportObject <- compareValues2(reportedValue = "1.18", obtainedValue = round(synch$sd, 2), valueType = 'sd')
 
 # asynchronous
-compareValues(reportedValue = 0.8, obtainedValue = asynch$Median)
-compareValues(reportedValue = 1.35, obtainedValue = round(asynch$sd, 2))
+reportObject <- compareValues2(reportedValue = "0.8", obtainedValue = asynch$Median, valueType = 'median')
+reportObject <- compareValues2(reportedValue = "1.35", obtainedValue = round(asynch$sd, 2), valueType = 'sd')
 ```
 
 We'll now try to reproduce Figure 3 from the original article. Here's the original:
-![](fig3.png)
+![](images/fig3.png)
 
 ```{r graphs}
 tidy.d %>% mutate(Condition = factor(Condition, levels = c("Synchronous", "Asynchronous"))) %>%
@@ -108,15 +115,17 @@ Now we will attempt to reproduce the inferential statistics in the target outcom
 > Illusion ratings after synchronous stimulation (Median(SD): 1.5(1.18)) was significantly higher than the central point (Wilcoxon test: p < 0.001). Hence, we can safely infer that we induced the RHI. Importantly, when comparing the synchronous and the asynchronous conditions (i.e. 25% rate of perceive synchrony) we found that participants experienced a significantly stronger RHI following the synchronous (median(SD) = 1.5(1.18)) compared to the asynchronous condition (median(SD) = 0.8(1.35); z(35) = 2.38; p = 0.017.
 
 ```{r}
-wilcox.test(d$Sync_RHI_Index, alternative = "greater", mu=0)$p.value 
+p <- wilcox.test(d$Sync_RHI_Index, alternative = "greater", mu=0)$p.value 
+reportObject <- compareValues2(reportedValue = "eyeballMATCH", obtainedValue = p, valueType = 'p')
 ```
+
 The authors do not provide an exact p-value so we cannot directly compare. Nevertheless, the obtained p-value matches the description of p <.001.
 
 ```{r}
 wilcox.out <- wilcox.test(d$ASync_RHI_Index, d$Sync_RHI_Index, paired = TRUE)
 z <- abs(qnorm(wilcox.out$p.value/2)) # calculate z value
-compareValues(reportedValue = .017, obtainedValue = round(wilcox.out$p.value,3), isP = T)
-compareValues(reportedValue = 2.38, obtainedValue = round(z,2))
+reportObject <- compareValues2(reportedValue = "0.017", obtainedValue = wilcox.out$p.value, valueType = 'p')
+reportObject <- compareValues2(reportedValue = "2.38", obtainedValue = z, valueType = 'z')
 ```
 
 ## Step 5: Conclusion
@@ -124,14 +133,56 @@ compareValues(reportedValue = 2.38, obtainedValue = round(z,2))
 This reproducibility check was a success. All target outcomes were successfully reproduced.
 
 ```{r}
-codReport(Report_Type = 'joint',
-          Article_ID = 'bGRfF', 
-          Insufficient_Information_Errors = 0,
-          Decision_Errors = 0, 
-          Major_Numerical_Errors = 0, 
-          Minor_Numerical_Errors = 2,
-          Author_Assistance = F)
+reportObject$Article_ID <- "bGRfF"
+reportObject$affectsConclusion <- NA
+reportObject$error_typo <- 0
+reportObject$error_specification <- 0
+reportObject$error_analysis <- 0
+reportObject$error_data <- 0
+reportObject$error_unidentified <- 0
+reportObject$Author_Assistance <- F
+reportObject$resolved_typo <- 0
+reportObject$resolved_specification <- 0
+reportObject$resolved_analysis <- 0
+reportObject$resolved_data <- 0
+reportObject$correctionSuggested <- NA
+reportObject$correctionPublished <- NA
+
+# decide on final outcome
+if(reportObject$Decision_Errors > 0 | reportObject$Major_Numerical_Errors > 0 | reportObject$Insufficient_Information_Errors > 0){
+  reportObject$finalOutcome <- "Failure"
+  if(reportObject$Author_Assistance == T){
+    reportObject$finalOutcome <- "Failure despite author assistance"
+  }
+}else{
+  reportObject$finalOutcome <- "Success"
+  if(reportObject$Author_Assistance == T){
+    reportObject$finalOutcome <- "Success with author assistance"
+  }
+}
+
+# save the report object
+filename <- paste0("reportObject_", reportObject$Article_ID,".csv")
+write_csv(reportObject, filename)
+
 ```
+
+## Report Object
+
+```{r, echo = FALSE}
+# display report object in chunks
+kable(reportObject[2:10], align = 'l')
+kable(reportObject[11:20], align = 'l')
+kable(reportObject[21:25], align = 'l')
+kable(reportObject[26:30], align = 'l')
+kable(reportObject[31:35], align = 'l')
+kable(reportObject[36:40], align = 'l')
+kable(reportObject[41:45], align = 'l')
+kable(reportObject[46:51], align = 'l')
+kable(reportObject[52:57], align = 'l')
+```
+
+## Session information
 
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
 devtools::session_info()
